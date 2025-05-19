@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golf Shot Distance Calculator</title>
+            <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #2c614f;
+            text-align: center;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        small {
+            display: block;
+            color: #666;
+            font-size: 0.85em;
+            margin-top: 2px;
+        }
+        button {
+            background-color: #2c614f;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #1f4a3c;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9f5f2;
+            border-radius: 5px;
+            border-left: 4px solid #2c614f;
+        }
+        .results h2 {
+            margin-top: 0;
+            color: #2c614f;
+        }
+        .results p {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        .calculation-details {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Golf Shot Distance Calculator</h1>
+        
+        <form id="golfForm">
+            <div class="form-group">
+                <label for="baseDistance">1. Base Distance (yards):</label>
+                <input type="number" id="baseDistance" required min="0" step="0.1" value="200">
+            </div>
+            
+            <div class="form-group">
+                <label for="altitude">2. Altitude (feet):</label>
+                <input type="number" id="altitude" required min="0" step="1" value="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="windSpeed">3. Wind Speed (mph):</label>
+                <input type="number" id="windSpeed" required min="0" step="0.1" value="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="windDirection">4. Wind Direction:</label>
+                <select id="windDirection" required>
+                    <option value="North">North (Tailwind)</option>
+                    <option value="Northeast">Northeast</option>
+                    <option value="East">East</option>
+                    <option value="Southeast">Southeast</option>
+                    <option value="South">South (Headwind)</option>
+                    <option value="Southwest">Southwest</option>
+                    <option value="West">West</option>
+                    <option value="Northwest">Northwest</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="lieAngle">5. Lie Angle (degrees -90 to 90):</label>
+                <input type="number" id="lieAngle" required min="-90" max="90" step="0.1" value="0" placeholder="Negative for downhill, positive for uphill">
+                <small>Negative values represent downhill lie, positive values represent uphill lie</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="lie">6. Lie (Surface Type):</label>
+                <select id="lie" required>
+                    <option value="Fairway">Fairway (very short, well-maintained grass)</option>
+                    <option value="ShortRough">Short Rough (long but well-maintained grass)</option>
+                    <option value="LongRough">Long Rough (long, poorly maintained grass)</option>
+                    <option value="Sand">Sand</option>
+                    <option value="SoftMud">Soft Mud</option>
+                    <option value="HardMud">Hard Mud</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="slope">7. Slope Change (feet):</label>
+                <input type="number" id="slope" required step="0.1" value="0">
+                <small>Positive values represent uphill (higher landing area), negative for downhill</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="temperature">8. Temperature (°F):</label>
+                <input type="number" id="temperature" required min="-50" max="120" step="0.1" value="70">
+            </div>
+            
+            <div class="form-group">
+                <label for="humidity">9. Humidity (%):</label>
+                <input type="number" id="humidity" required min="0" max="100" step="0.1" value="0">
+            </div>
+            
+            <button type="submit">Calculate Distance</button>
+        </form>
+        
+        <div id="results" class="results hidden">
+            <h2>Shot Distance Results</h2>
+            <p><strong>Total Distance North:</strong> <span id="distanceNorth">0</span> yards</p>
+            <p><strong>Lateral Deviation:</strong> <span id="lateralDeviation">0</span> yards <span id="deviationDirection"></span></p>
+        </div>
+        
+        <div id="calculationDetails" class="calculation-details hidden">
+            <h3>Calculation Details:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Factor</th>
+                        <th>Effect on Distance (yards)</th>
+                    </tr>
+                </thead>
+                <tbody id="detailsTable">
+                    <!-- Will be filled with JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('golfForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            calculateDistance();
+        });
+        
+        function calculateDistance() {
+            // Get all input values
+            const baseDistance = parseFloat(document.getElementById('baseDistance').value);
+            const altitude = parseFloat(document.getElementById('altitude').value);
+            const windSpeed = parseFloat(document.getElementById('windSpeed').value);
+            const windDirection = document.getElementById('windDirection').value;
+            const lieAngle = parseFloat(document.getElementById('lieAngle').value);
+            const lie = document.getElementById('lie').value;
+            const slope = parseFloat(document.getElementById('slope').value);
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            const humidity = parseFloat(document.getElementById('humidity').value);
+            
+            // Create object to store calculation details
+            const effects = {};
+            
+            // 1. Base Distance effect (this is our starting point)
+            effects.base = {
+                name: "Base Distance",
+                distanceEffect: baseDistance,
+                lateralEffect: 0
+            };
+            
+            // 2. Altitude effect
+            // According to research, shots gain about 2% distance per 1000 feet of elevation
+            const altitudeEffect = baseDistance * (altitude / 1000) * 0.02;
+            effects.altitude = {
+                name: "Altitude",
+                distanceEffect: altitudeEffect,
+                lateralEffect: 0
+            };
+            
+            // 3 & 4. Wind effect (speed and direction)
+            let windDistanceEffect = 0;
+            let windLateralEffect = 0;
+            
+            // Wind direction angles (assuming North is 0 degrees)
+            const windAngles = {
+                "North": 0,
+                "Northeast": 45,
+                "East": 90,
+                "Southeast": 135,
+                "South": 180,
+                "Southwest": 225,
+                "West": 270,
+                "Northwest": 315
+            };
+            
+            // Convert wind direction to angle
+            const windAngle = windAngles[windDirection];
+            
+            // Calculate wind components using vector decomposition
+            // For headwind/tailwind: cos(angle) * windSpeed * distanceFactor
+            // For crosswind: sin(angle) * windSpeed * lateralFactor
+            
+            // Research suggests wind affects distance approximately 1-2 yards per 1 mph
+            // Direction impacts this: headwind has more effect than tailwind
+            const windDistanceFactor = (windAngle >= 135 && windAngle <= 225) ? -1.5 : 1.0; // Headwind has more impact
+            const windLateralFactor = 1.2; // Yards of lateral movement per 1 mph of crosswind
+            
+            // Calculate the components
+            windDistanceEffect = Math.cos(windAngle * Math.PI / 180) * windSpeed * windDistanceFactor;
+            windLateralEffect = Math.sin(windAngle * Math.PI / 180) * windSpeed * windLateralFactor;
+            
+            effects.wind = {
+                name: "Wind",
+                distanceEffect: windDistanceEffect,
+                lateralEffect: windLateralEffect
+            };
+            
+            // 5. Lie Angle effect
+            // Positive angles (uphill) reduce distance, negative angles (downhill) increase distance
+            // Research suggests roughly 1-2 yards loss per degree of upslope
+            const lieAngleEffect = -lieAngle * 1.5;
+            effects.lieAngle = {
+                name: "Lie Angle",
+                distanceEffect: lieAngleEffect,
+                lateralEffect: 0
+            };
+            
+            // 6. Lie (Surface) effect
+            // Different surfaces affect distance and control
+            const lieFactor = {
+                "Fairway": { distance: 1.0, lateral: 0 },      // Base reference
+                "ShortRough": { distance: 0.9, lateral: 0.5 }, // 10% less distance, slight lateral variation
+                "LongRough": { distance: 0.8, lateral: 1.0 },  // 20% less distance, more lateral variation
+                "Sand": { distance: 0.7, lateral: 1.5 },       // 30% less distance, significant lateral impact
+                "SoftMud": { distance: 0.65, lateral: 1.2 },   // 35% less distance, moderate lateral impact
+                "HardMud": { distance: 0.85, lateral: 0.8 }    // 15% less distance, some lateral impact
+            };
+            
+            // Calculate the lie effects
+            const lieDistanceEffect = (lieFactor[lie].distance - 1) * baseDistance;
+            // Lateral effect is potentially random direction, but we'll use a fixed direction based on lie
+            // for consistency in the calculator
+            const lieLateralEffect = lieFactor[lie].lateral * 2;
+            
+            effects.lie = {
+                name: "Surface Type",
+                distanceEffect: lieDistanceEffect,
+                lateralEffect: lieLateralEffect
+            };
+            
+            // 7. Slope effect
+            // Based on sources: TCPalm, 18Birdies, and Probable Golf Instruction
+            // Approximately 1.5% change in distance for each 10 feet of elevation change
+            // Uphill reduces distance, downhill increases it
+            const slopeDistanceEffect = -(slope / 10) * 0.015 * baseDistance;
+            
+            effects.slope = {
+                name: "Slope",
+                distanceEffect: slopeDistanceEffect,
+                lateralEffect: 0
+            };
+            
+            // 8. Temperature effect
+            // Research suggests approximately 2 yards per 10°F change from 70°F
+            const tempDiff = temperature - 70; // difference from 70°F
+            const temperatureEffect = (tempDiff / 10) * 2;
+            
+            effects.temperature = {
+                name: "Temperature",
+                distanceEffect: temperatureEffect,
+                lateralEffect: 0
+            };
+            
+            // 9. Humidity effect
+            // Higher humidity can slightly increase distance (less air resistance)
+            // Research suggests approximately 0.5-1% increase at high humidity
+            const humidityEffect = baseDistance * (humidity / 100) * 0.007;
+            
+            effects.humidity = {
+                name: "Humidity",
+                distanceEffect: humidityEffect,
+                lateralEffect: 0
+            };
+            
+            // Calculate total effects
+            let totalDistanceEffect = baseDistance;
+            let totalLateralEffect = 0;
+            
+            // Generate details table rows and add up effects
+            let tableHTML = '';
+            for (const factor in effects) {
+                const effect = effects[factor];
+                totalDistanceEffect += (factor === 'base' ? 0 : effect.distanceEffect);
+                totalLateralEffect += effect.lateralEffect;
+                
+                tableHTML += `
+                    <tr>
+                        <td>${effect.name}</td>
+                        <td>${factor === 'base' ? effect.distanceEffect.toFixed(1) : (effect.distanceEffect >= 0 ? '+' : '') + effect.distanceEffect.toFixed(1)} yards ${
+                            effect.lateralEffect !== 0 ? 
+                            `(Lateral: ${effect.lateralEffect >= 0 ? '+' : ''}${effect.lateralEffect.toFixed(1)} yards)` : 
+                            ''
+                        }</td>
+                    </tr>
+                `;
+            }
+            
+            document.getElementById('detailsTable').innerHTML = tableHTML;
+            
+            // Display results
+            document.getElementById('distanceNorth').textContent = totalDistanceEffect.toFixed(1);
+            document.getElementById('lateralDeviation').textContent = Math.abs(totalLateralEffect).toFixed(1);
+            document.getElementById('deviationDirection').textContent = totalLateralEffect >= 0 ? 'East' : 'West';
+            
+            // Show results sections
+            document.getElementById('results').classList.remove('hidden');
+            document.getElementById('calculationDetails').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
