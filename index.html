@@ -129,6 +129,7 @@
                     <option value="West">West</option>
                     <option value="Northwest">Northwest</option>
                 </select>
+                <small>Assumes all shots aimed due North (i.e. "North" = tailwind, "South" = headwind)</small>
             </div>
             
             <div class="form-group">
@@ -170,8 +171,9 @@
         
         <div id="results" class="results hidden">
             <h2>Shot Distance Results</h2>
-            <p><strong>Total Distance North:</strong> <span id="distanceNorth">0</span> yards</p>
+            <p><strong>Total Distance "North":</strong> <span id="distanceNorth">0</span> yards</p>
             <p><strong>Lateral Deviation:</strong> <span id="lateralDeviation">0</span> yards <span id="deviationDirection"></span></p>
+            <small>Positive value = Right/East; Negative Value = Left/West</small>
         </div>
         
         <div id="calculationDetails" class="calculation-details hidden">
